@@ -1,0 +1,167 @@
+{
+	"annotations": [
+		{
+			"bbox": [187.10000610351562, 117.5999755859375, 176, 19.20001220703125],
+			"borderStyle": "solid",
+			"borderWidth": 1,
+			"createdAt": "2025-10-30T16:47:38Z",
+			"creatorName": "2022",
+			"customData": {
+				"attributeId": 2022,
+				"index": "0",
+				"isCollection": true,
+				"isRequired": "false",
+				"sectionId": 251,
+				"type": "Dropdown"
+			},
+			"font": "Helvetica",
+			"fontSize": 12,
+			"formFieldName": "251.0.2022",
+			"horizontalAlign": "left",
+			"id": "01K8V097G6RCXBNYB5JZ7VXQ1Q",
+			"lineHeightFactor": 1.186000108718872,
+			"name": "01K8V097G94VTBJQYMY5MTX2CG",
+			"opacity": 1,
+			"pageIndex": 0,
+			"rotation": 0,
+			"type": "pspdfkit/widget",
+			"updatedAt": "2025-10-30T16:47:45Z",
+			"v": 2,
+			"verticalAlign": "center"
+		},
+		{
+			"bbox": [60.70000076293945, 220, 176, 19.20001220703125],
+			"borderStyle": "solid",
+			"borderWidth": 1,
+			"createdAt": "2025-10-30T16:47:38Z",
+			"creatorName": "2021",
+			"customData": {
+				"attributeId": 2021,
+				"index": "0",
+				"isCollection": true,
+				"isRequired": "false",
+				"sectionId": 251,
+				"type": "Date"
+			},
+			"font": "Helvetica",
+			"fontSize": 12,
+			"formFieldName": "251.0.2021",
+			"horizontalAlign": "left",
+			"id": "01K8V09AN7GAADQB4GJC54Z7RS",
+			"lineHeightFactor": 1.186000108718872,
+			"name": "01K8V09AN8K5XH8CWMBVHC8JJA",
+			"opacity": 1,
+			"pageIndex": 0,
+			"rotation": 0,
+			"type": "pspdfkit/widget",
+			"updatedAt": "2025-10-30T16:47:48Z",
+			"v": 2,
+			"verticalAlign": "center"
+		},
+		{
+			"bbox": [
+				230.3000030517578, 169.5999755859375, 175.99998474121094,
+				19.20001220703125
+			],
+			"borderStyle": "solid",
+			"borderWidth": 1,
+			"createdAt": "2025-10-30T16:47:38Z",
+			"creatorName": "2044",
+			"customData": {
+				"attributeId": 2044,
+				"index": "0",
+				"isCollection": true,
+				"sectionId": 257,
+				"type": "Dropdown"
+			},
+			"font": "Helvetica",
+			"fontSize": 12,
+			"formFieldName": "257.0.2044",
+			"horizontalAlign": "left",
+			"id": "01K8V09E1KJ9FBD138B9K5ZAN7",
+			"lineHeightFactor": 1.186000108718872,
+			"name": "01K8V09E1MGXX28BYXY7T3JB3H",
+			"opacity": 1,
+			"pageIndex": 0,
+			"rotation": 0,
+			"type": "pspdfkit/widget",
+			"updatedAt": "2025-10-30T16:47:38Z",
+			"v": 2,
+			"verticalAlign": "center"
+		}
+	],
+	"formFieldValues": [
+		{
+			"name": "251.0.2022",
+			"type": "pspdfkit/form-field-value",
+			"v": 1,
+			"value": ""
+		},
+		{
+			"name": "251.0.2021",
+			"type": "pspdfkit/form-field-value",
+			"v": 1,
+			"value": ""
+		},
+		{
+			"name": "257.0.2044",
+			"type": "pspdfkit/form-field-value",
+			"v": 1,
+			"value": ""
+		}
+	],
+	"formFields": [
+		{
+			"annotationIds": ["01K8V097G6RCXBNYB5JZ7VXQ1Q"],
+			"comb": false,
+			"defaultValue": "",
+			"doNotScroll": false,
+			"doNotSpellCheck": false,
+			"id": "01K8V09H9HG1Q6322K160TSCHW",
+			"label": "2022",
+			"maxLength": 128,
+			"multiLine": false,
+			"name": "251.0.2022",
+			"password": false,
+			"pdfObjectId": 16,
+			"richText": false,
+			"type": "pspdfkit/form-field/text",
+			"v": 1
+		},
+		{
+			"annotationIds": ["01K8V09AN7GAADQB4GJC54Z7RS"],
+			"comb": false,
+			"defaultValue": "",
+			"doNotScroll": false,
+			"doNotSpellCheck": false,
+			"id": "01K8V09H9MSRT982VJWQMDX0BP",
+			"label": "2021",
+			"maxLength": 128,
+			"multiLine": false,
+			"name": "251.0.2021",
+			"password": false,
+			"pdfObjectId": 23,
+			"richText": false,
+			"type": "pspdfkit/form-field/text",
+			"v": 1
+		},
+		{
+			"annotationIds": ["01K8V09E1KJ9FBD138B9K5ZAN7"],
+			"comb": false,
+			"defaultValue": "",
+			"doNotScroll": false,
+			"doNotSpellCheck": false,
+			"id": "01K8V09H9MD7FVMFX10VR3B2K1",
+			"label": "2044",
+			"maxLength": 128,
+			"multiLine": false,
+			"name": "257.0.2044",
+			"password": false,
+			"pdfObjectId": 26,
+			"richText": false,
+			"type": "pspdfkit/form-field/text",
+			"v": 1
+		}
+	],
+	"format": "https://pspdfkit.com/instant-json/v1"
+}
