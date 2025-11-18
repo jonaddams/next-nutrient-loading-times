@@ -109,21 +109,42 @@ export default function ComparisonViewer({
 						break;
 
 					case "document-engine": {
-						// Use Nutrient DWS with pre-configured token
-						const serverUrl =
-							process.env.NEXT_PUBLIC_DOCUMENT_ENGINE_SERVER_URL;
+						// Fetch JWT token from server-side API
 						const documentId =
 							process.env.NEXT_PUBLIC_DOCUMENT_ENGINE_DOCUMENT_ID;
-						const jwt = process.env.NEXT_PUBLIC_DOCUMENT_ENGINE_JWT;
 
-						if (!serverUrl || !documentId || !jwt) {
-							throw new Error("Nutrient DWS credentials not configured");
+						if (!documentId) {
+							throw new Error("Document Engine document ID not configured");
 						}
+
+						console.log(`[${method}] Fetching JWT from server API...`);
+						console.log(`[${method}] Document ID: ${documentId}`);
+
+						// Call server-side API to get JWT token
+						const authResponse = await fetch("/api/document-engine-auth", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ documentId }),
+						});
+
+						if (!authResponse.ok) {
+							const errorData = await authResponse.json();
+							const errorMsg =
+								errorData.error === "Document Engine is not configured"
+									? "Document Engine is not configured. Please set DOCUMENT_ENGINE_SERVER_URL and DOCUMENT_ENGINE_API_KEY in your .env.local file."
+									: `Failed to authenticate: ${errorData.error || "Unknown error"}`;
+							throw new Error(errorMsg);
+						}
+
+						const authData = await authResponse.json();
+						const { jwt, serverUrl } = authData;
 
 						console.log(
 							`[${method}] Using Nutrient DWS serverUrl: ${serverUrl}`,
 						);
-						console.log(`[${method}] Document ID: ${documentId}`);
+						console.log(`[${method}] JWT token received from server`);
 
 						config = {
 							container,

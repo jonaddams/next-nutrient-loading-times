@@ -1,8 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nutrient Web SDK Loading Performance Demo
+
+This Next.js application demonstrates and compares different PDF loading methods using Nutrient Web SDK:
+- Standard Web SDK loading
+- Linearized PDF loading
+- Nutrient Document Engine (DWS) with streaming
+
+## Environment Setup
+
+1. Copy the sample environment file:
+```bash
+cp env.sample .env.local
+```
+
+2. Configure your environment variables in `.env.local`:
+
+```bash
+# Nutrient Web SDK Configuration
+NEXT_PUBLIC_WEB_SDK_VERSION=1.8.0
+NEXT_PUBLIC_WEB_SDK_LICENSE_KEY=your_license_key
+
+# Nutrient Document Engine (Server-side only - KEEP SECRET)
+DOCUMENT_ENGINE_SERVER_URL=https://your-dws-instance.com
+DOCUMENT_ENGINE_API_KEY=your_api_key
+
+# Document Engine Document ID (Public - safe for client)
+NEXT_PUBLIC_DOCUMENT_ENGINE_DOCUMENT_ID=your_document_id
+```
+
+**Important Security Note:**
+- ⚠️ Never use `NEXT_PUBLIC_` prefix for sensitive credentials like API keys
+- ✅ Server-side variables (without `NEXT_PUBLIC_`) are only accessible in API routes
+- ✅ This demo uses a secure server-side API route to generate JWT tokens
 
 ## Getting Started
 
-First, run the development server:
+First, install dependencies and run the development server:
 
 ```bash
 npm run dev
@@ -16,9 +48,37 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Document Engine JWT Authentication (Best Practice)
+
+This demo implements secure JWT token generation for Document Engine authentication:
+
+1. **Client Request**: The client sends a document ID to `/api/document-engine-auth`
+2. **Server-Side Token Generation**: The API route uses the server-side API key to request a JWT from Document Engine
+3. **Secure Response**: The JWT is returned to the client without exposing the API key
+4. **Viewer Initialization**: The client uses the JWT to authenticate with Document Engine
+
+**Why This Matters:**
+- 🔒 API keys remain secure on the server
+- ✅ Follows security best practices
+- 🎯 Provides a reference implementation for production use
+- ⚡ Tokens can be generated on-demand with custom permissions
+
+### File Structure
+
+```
+app/
+├── api/
+│   └── document-engine-auth/
+│       └── route.ts          # Server-side JWT generation
+├── compare/
+│   └── page.tsx              # Performance comparison view
+└── page.tsx                  # Home page with method selection
+
+components/
+└── ComparisonViewer.tsx      # PDF viewer component
+```
 
 ## Learn More
 

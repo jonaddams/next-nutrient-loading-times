@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import ComparisonViewer from "@/components/ComparisonViewer";
 import type { LoadingMethod, ViewerState } from "@/types";
 
@@ -19,19 +19,23 @@ function CompareContent() {
 		: [];
 
 	useEffect(() => {
-		if (selectedMethods.length === 0) {
+		const methods: LoadingMethod[] = methodsParam
+			? (methodsParam.split(",") as LoadingMethod[])
+			: [];
+
+		if (methods.length === 0) {
 			router.push("/");
 			return;
 		}
 
 		// Initialize viewer states
-		const initialStates: ViewerState[] = selectedMethods.map((method) => ({
+		const initialStates: ViewerState[] = methods.map((method) => ({
 			method,
 			metrics: {},
 			isLoading: false,
 		}));
 		setViewerStates(initialStates);
-	}, [selectedMethods, router]);
+	}, [methodsParam, router]);
 
 	const handleStart = () => {
 		setIsStarted(true);
@@ -58,6 +62,21 @@ function CompareContent() {
 		},
 		[],
 	);
+
+	// Create stable update handlers for each method
+	const updateHandlers = useMemo(() => {
+		const methods: LoadingMethod[] = methodsParam
+			? (methodsParam.split(",") as LoadingMethod[])
+			: [];
+		return methods.reduce(
+			(acc, method) => {
+				acc[method] = (updates: Partial<ViewerState>) =>
+					updateViewerState(method, updates);
+				return acc;
+			},
+			{} as Record<LoadingMethod, (updates: Partial<ViewerState>) => void>,
+		);
+	}, [methodsParam, updateViewerState]);
 
 	const getMethodName = (method: LoadingMethod): string => {
 		switch (method) {
@@ -168,9 +187,7 @@ function CompareContent() {
 									methodName={getMethodName(method)}
 									isStarted={isStarted}
 									state={state}
-									onUpdateState={(updates) =>
-										updateViewerState(method, updates)
-									}
+									onUpdateState={updateHandlers[method]}
 								/>
 							);
 						})}
