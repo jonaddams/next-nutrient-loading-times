@@ -48,7 +48,6 @@ export default function ComparisonViewer({
 
 		let mounted = true;
 		isLoadingRef.current = true;
-		startTimeRef.current = performance.now();
 
 		onUpdateState({ isLoading: true, error: undefined });
 
@@ -89,9 +88,6 @@ export default function ComparisonViewer({
 					licenseKey,
 				};
 
-				console.log(
-					`[${method}] Starting load at ${performance.now() - startTimeRef.current}ms`,
-				);
 				console.log(`[${method}] Loading document: ${documentToLoad}`);
 
 				// Configure based on loading method
@@ -157,13 +153,61 @@ export default function ComparisonViewer({
 					}
 				}
 
+				// Add read-only view state for all viewers
+				const initialViewState = new NutrientViewer.ViewState({
+					readOnly: true,
+				});
+
+				// Configure minimal toolbar items (navigation only, no annotations)
+				const toolbarItems = NutrientViewer.defaultToolbarItems.filter((item) =>
+					[
+						"pager",
+						"previous-page",
+						"next-page",
+						"page-jump",
+						"zoom-in",
+						"zoom-out",
+						"zoom-mode",
+						"sidebar-thumbnails",
+						"sidebar-document-outline",
+						"search",
+					].includes(item.type),
+				);
+
 				// Load the viewer - this returns when first page is ready
+				// Start timing right before we call load() to measure actual viewer initialization
 				console.log(`[${method}] Calling NutrientViewer.load()...`);
 				console.log(`[${method}] Full config:`, config);
-				const loadStartTime = performance.now();
-				const instance = await NutrientViewer.load(config);
+				startTimeRef.current = performance.now(); // Start timing here, after any auth setup
+
+				// Track first page render with callback
+				let firstPageRendered = false;
+
+				const instance = await NutrientViewer.load({
+					...config,
+					initialViewState,
+					toolbarItems,
+					renderPageCallback: (ctx, pageIndex, pageSize) => {
+						if (pageIndex === 0 && !firstPageRendered) {
+							firstPageRendered = true;
+							const firstRenderTime = performance.now();
+							const timeToFirstRender = firstRenderTime - startTimeRef.current;
+
+							console.log(
+								`[${method}] First page rendered: ${(timeToFirstRender / 1000).toFixed(3)}s`,
+							);
+
+							setMetrics((prev) => ({
+								...prev,
+								timeToFirstRender,
+								startTime: startTimeRef.current,
+							}));
+						}
+					},
+				});
+
 				const loadEndTime = performance.now();
-				const loadDuration = loadEndTime - loadStartTime;
+				const loadDuration = loadEndTime - startTimeRef.current;
 
 				console.log(
 					`[${method}] NutrientViewer.load() resolved after ${(loadDuration / 1000).toFixed(2)}s`,
@@ -183,73 +227,6 @@ export default function ComparisonViewer({
 
 				instanceRef.current = instance;
 
-				// Time to first render - captured when load() resolves (first page visible)
-				const firstRenderTime = performance.now();
-				const timeToFirstRender = firstRenderTime - startTimeRef.current;
-
-				console.log(
-					`[${method}] First render: ${(timeToFirstRender / 1000).toFixed(2)}s (total time from start)`,
-				);
-
-				setMetrics((prev) => ({
-					...prev,
-					timeToFirstRender,
-					startTime: startTimeRef.current,
-				}));
-
-				// For linearized: first render happens quickly, but document continues loading
-				// For standard: load() waits for full document before resolving
-
-				// Track when user can interact (usually same as first render for Web SDK)
-				setMetrics((prev) => ({
-					...prev,
-					timeToInteractive: timeToFirstRender,
-				}));
-
-				// Track when document is fully loaded
-				// Use the document.change event which fires when document is fully loaded
-				let fullyLoadedCaptured = false;
-
-				const checkFullyLoaded = async () => {
-					if (!fullyLoadedCaptured && mounted) {
-						try {
-							const pageCount = await instance.totalPageCount;
-							const currentPage = await instance.currentPageIndex;
-
-							// Document is fully loaded when we can query all pages
-							if (pageCount > 0 && currentPage !== undefined) {
-								fullyLoadedCaptured = true;
-								const fullyLoadedTime = performance.now();
-								const timeToFullyLoaded =
-									fullyLoadedTime - startTimeRef.current;
-
-								console.log(
-									`[${method}] Fully loaded: ${(timeToFullyLoaded / 1000).toFixed(2)}s (${pageCount} pages)`,
-								);
-
-								setMetrics((prev) => ({
-									...prev,
-									timeToFullyLoaded,
-								}));
-							}
-						} catch (_err) {
-							// Silently continue - document may still be loading
-						}
-					}
-				};
-
-				// Start checking immediately
-				await checkFullyLoaded();
-
-				// If not captured yet, poll periodically
-				if (!fullyLoadedCaptured) {
-					const pollInterval = setInterval(checkFullyLoaded, 200);
-
-					// Clean up polling after 30 seconds
-					setTimeout(() => {
-						clearInterval(pollInterval);
-					}, 30000);
-				}
 
 				// Get file size and check server capabilities
 				try {
@@ -406,7 +383,7 @@ export default function ComparisonViewer({
 	const getStatusColor = () => {
 		if (state?.error) return "border-(--code-coral)";
 		if (state?.isLoading) return "border-(--digital-pollen)";
-		if (metrics.timeToFullyLoaded) return "border-(--data-green)";
+		if (metrics.timeToFirstRender) return "border-(--data-green)";
 		return "border-(--warm-gray-400)";
 	};
 
@@ -426,7 +403,7 @@ export default function ComparisonViewer({
 					{state?.error && (
 						<span className="nutrient-badge nutrient-badge-coral">Error</span>
 					)}
-					{!state?.isLoading && !state?.error && metrics.timeToFullyLoaded && (
+					{!state?.isLoading && !state?.error && metrics.timeToFirstRender && (
 						<span className="nutrient-badge nutrient-badge-success">
 							Loaded
 						</span>
@@ -441,22 +418,6 @@ export default function ComparisonViewer({
 						</span>
 						<div className="font-mono font-semibold">
 							{formatTime(metrics.timeToFirstRender)}
-						</div>
-					</div>
-					<div>
-						<span className="text-(--warm-gray-600) uppercase font-mono">
-							Fully Loaded
-						</span>
-						<div className="font-mono font-semibold">
-							{formatTime(metrics.timeToFullyLoaded)}
-						</div>
-					</div>
-					<div>
-						<span className="text-(--warm-gray-600) uppercase font-mono">
-							Interactive
-						</span>
-						<div className="font-mono font-semibold">
-							{formatTime(metrics.timeToInteractive)}
 						</div>
 					</div>
 					<div>
